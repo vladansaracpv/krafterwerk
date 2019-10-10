@@ -1,24 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
+import Dial from "./Dial";
+import RadioGroup from "./RadioGroup";
 
 function App() {
+  const [oscType, setOscType] = useState("sine");
+
+  const onChangeHandler = e => {
+    const type = e.target.value;
+    console.log(type);
+    setOscType(type);
+  };
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Dial />
+      <RadioGroup value={oscType} onChange={onChangeHandler} />
     </div>
   );
 }
