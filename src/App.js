@@ -1,67 +1,75 @@
 import React, { useState, useRef, useCallback } from "react";
 import "./App.css";
+import Pan from "./UI/Pan";
 import Dial from "./UI/Dial";
 import RadioGroup from "./UI/RadioGroup";
-import Toggle from "./UI/Toggle";
-import Pan from "./UI/Pan";
+import Piano from "./UI/Piano";
 import Oscilloscope from "./UI/Oscilloscope";
+import InputNum from "./UI/InputNumber";
+
 import * as Nexus from "nexusui";
+import { BtnOn, BtnPlay } from "./UI/Toggle";
 
-const functions = new Set();
+const Tone = window.Tone;
+Nexus.context = Tone.context;
+
 function App() {
-  const [dialValue, setDialValue] = useState(0);
-  const [oscType, setOscType] = useState("sine");
-  const [powerValue, setPowerValue] = useState(0);
-  const [panValue, setPanValue] = useState(0);
+  // BtnOnOff
+  const [power, setPower] = useState(0);
+  const onPowerToggled = useCallback(state => setPower(state), []);
+  const PowerButton = BtnOn;
+
+  // // BtnPlayStop
+  const [play, setPlay] = useState(0);
+  const onPlayToggled = useCallback(state => setPlay(state), []);
+  const PlayButton = BtnPlay;
+
+  // Pan component
   const panRef = useRef(null);
+  const [panValue, setPanValue] = useState(0);
+  const onPanReady = useCallback(pan => (panRef.current = pan), []);
+  const onPanChanged = useCallback(newValue => setPanValue(newValue.value), []);
+
+  // Dial component
   const dialRef = useRef(null);
-  const oscRef = useRef(null);
-
-  const Tone = window.Tone;
-  Nexus.context = Tone.context;
-
+  const [dialValue, setDialValue] = useState(0);
   const onDialReady = useCallback(dial => (dialRef.current = dial), []);
-
   const onDialChanged = useCallback(value => setDialValue(value), []);
 
-  const onPanReady = useCallback(pan => (panRef.current = pan), []);
+  // Type component
+  const [type, setType] = useState("sine");
+  const onTypeChanged = useCallback(value => setType(value), []);
 
-  const onPanChanged = useCallback(({ value }) => setPanValue(value), []);
+  // Piano;
+  const pianoRef = useRef(null);
+  const onPianoReady = useCallback(piano => (pianoRef.current = piano), []);
+  const onPianoChanged = useCallback(value => console.log(value), []);
 
-  const onTypeChanged = useCallback(e => {
-    const type = e.target.value;
-    console.log(type);
-    setOscType(type);
-  }, []);
-
-  const onPowerToggled = useCallback(state => {
-    console.log("state", state);
-    setPowerValue(state);
-  }, []);
-
+  // Oscillator
+  const oscRef = useRef(null);
   const onOscReady = useCallback(oscilloscope => {
     oscRef.current = oscilloscope;
-    var o = Tone.context.createOscillator();
-    o.connect(Tone.Master);
-    oscRef.current.connect(Tone.Master);
-    o.start(0);
-    o.stop(2);
+    // var o = Tone.context.createOscillator();
+    // o.connect(Tone.Master);
+    // oscRef.current.connect(Tone.Master);
+    // o.start(0);
+    // o.stop(2);
   }, []);
 
-  functions.add(onPanReady);
-  functions.add(onPanChanged);
-  functions.add(onDialReady);
-  functions.add(onDialChanged);
-  functions.add(onTypeChanged);
-  functions.add(onPowerToggled);
+  // Dial component
+  const [inputValue, setInputValue] = useState(0);
+  const onInputNumChanged = useCallback(value => setInputValue(value), []);
 
   return (
     <div className="App">
-      <Dial value={dialValue} onChange={onDialChanged} onReady={onDialReady} />
-      <RadioGroup value={oscType} onChange={onTypeChanged} />
-      <Toggle value={powerValue} onChange={onPowerToggled} />
-      <Pan value={panValue} onChange={onPanChanged} onReady={onPanReady} />
+      <PlayButton value={power} onChange={onPowerToggled} />
+      <PowerButton value={play} onChange={onPlayToggled} />
+      <Pan onReady={onPanReady} value={panValue} onChange={onPanChanged} />
+      <Dial value={dialValue} onReady={onDialReady} onChange={onDialChanged} />
+      <RadioGroup value={type} onChange={onTypeChanged} />
+      <Piano onReady={onPianoReady} onChange={onPianoChanged} />
       <Oscilloscope onReady={onOscReady} />
+      <InputNum onChange={onInputNumChanged} value={inputValue} />
     </div>
   );
 }

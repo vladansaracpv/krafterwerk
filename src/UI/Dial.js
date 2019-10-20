@@ -1,88 +1,101 @@
 import React, { useEffect, useRef } from "react";
+import { Divider } from "antd";
 import * as Nexus from "nexusui";
 import { getId, NO_OP } from "../utils";
 
-const Dial = React.memo(function Dial({
-  value = 0,
-  size = [75, 75],
-  interaction = "radial",
-  max = 1,
-  min = 0,
-  mode = "relative",
-  step = 0,
-  onChange = NO_OP,
-  onReady = NO_OP
-}) {
-  let dial = useRef(null);
-  let elementId = useRef(`nexus-ui-dial-${getId()}`);
+const defaultProps = {
+  value: 0,
+  size: [75, 75],
+  interaction: "radial",
+  min: 0,
+  max: 100,
+  mode: "relative",
+  colors: { knob: "#40a9ff", background: "#eee" },
+  step: 1,
+  onChange: NO_OP,
+  onReady: NO_OP
+};
 
-  console.log("Dial rendered");
+function Dial(props) {
+  const {
+    value,
+    size,
+    interaction,
+    min,
+    max,
+    mode,
+    colors,
+    step,
+    onChange,
+    onReady
+  } = { ...defaultProps, ...props };
+  let dial = useRef(null);
+  let elementId = useRef(`krafterwerk-dial-${getId()}`);
 
   useEffect(() => {
-    // componentDidMount
     dial.current = new Nexus.Dial(elementId.current);
-    dial.current.colorize("accent", "#1890ff");
 
-    // Fire onReady callback
+    dial.current.on("change", onChange);
+
     onReady(dial.current);
 
-    // onChange => call onChange callback
-    dial.current.on("change", newState => {
-      onChange(newState);
-    });
-
-    // componentWillUnmount
     return () => {
       dial.current.destroy();
     };
-  }, [onReady, onChange]);
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (!Array.isArray(size)) {
-      return;
-    }
+    if (dial.current === null || !Array.isArray(size)) return;
+
     dial.current.resize(...size);
   }, [size]);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (value === undefined) return;
+    if (dial.current === null || value === undefined) return;
 
     dial.current.value = value;
   }, [value]);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (mode === undefined) return;
+    if (dial.current === null || mode === undefined) return;
+
     dial.current.mode = mode;
   }, [mode]);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (step === undefined) return;
+    if (dial.current === null || step === undefined) return;
+
     dial.current.step = step;
   }, [step]);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (min === undefined) return;
+    if (dial.current === null || min === undefined) return;
+
     dial.current.min = min;
   }, [min]);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (max === undefined) return;
+    if (dial.current === null || max === undefined) return;
+
     dial.current.max = max;
   }, [max]);
 
   useEffect(() => {
-    if (dial.current === null) return;
-    if (interaction === undefined) return;
+    if (dial.current === null || colors === undefined) return;
+
+    const { knob, background } = colors;
+    if (knob) dial.current.colorize("accent", knob);
+    if (background) dial.current.colorize("fill", background);
+  }, [colors]);
+
+  useEffect(() => {
+    if (dial.current === null || interaction === undefined) return;
+
     dial.current.interaction = interaction;
   }, [interaction]);
 
   return <div key={elementId.current} id={elementId.current}></div>;
-});
+}
 
 export default Dial;

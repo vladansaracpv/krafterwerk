@@ -5,3 +5,5 @@ export function getId() {
 }
 
 export const NO_OP = () => {};
+
+export const either = (a, b, c) => (c ? a : b);

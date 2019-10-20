@@ -2,45 +2,52 @@ import React, { useEffect, useRef } from "react";
 import * as Nexus from "nexusui";
 import { getId, NO_OP } from "../utils";
 
-const Pan = React.memo(function Pan({
-  size = [120, 30],
-  value = 0,
-  onChange = NO_OP,
-  onReady = NO_OP
-}) {
-  let pan = useRef(null);
-  let elementId = useRef(`nexus-ui-pan-${getId()}`);
+const defaultProps = {
+  value: 0,
+  size: [120, 30],
+  colors: { button: "#40a9ff", background: "#eee" },
+  onChange: NO_OP,
+  onReady: NO_OP
+};
+function Pan(props) {
+  const { size, value, colors, onChange, onReady } = {
+    ...defaultProps,
+    ...props
+  };
+  let panRef = useRef(null);
+  let elementId = useRef(`krafterwerk-pan-${getId()}`);
 
   useEffect(() => {
-    pan.current = new Nexus.Pan(elementId.current);
-    pan.current.colorize("accent", "#1890ff");
-    onReady(pan.current);
+    panRef.current = new Nexus.Pan(elementId.current);
 
-    pan.current.on("change", newState => {
-      onChange(newState);
-    });
+    panRef.current.on("change", onChange);
+
+    onReady(panRef.current);
 
     return () => {
-      pan.current.destroy();
+      panRef.current.destroy();
     };
-  }, [onReady, onChange]);
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
-    if (pan.current === null) return;
-    if (!Array.isArray(size)) {
-      return;
-    }
-    pan.current.resize(...size);
+    if (panRef.current === null || !Array.isArray(size)) return;
+    panRef.current.resize(...size);
   }, [size]);
 
   useEffect(() => {
-    if (pan.current === null) return;
-    if (value === undefined) return;
-
-    pan.current.value = value;
+    if (panRef.current === null || value === undefined) return;
+    panRef.current.value = value;
   }, [value]);
 
-  return <div id={elementId.current}></div>;
-});
+  useEffect(() => {
+    if (panRef.current === null || colors === undefined) return;
 
+    const { button, background } = colors;
+    if (button) panRef.current.colorize("accent", button);
+    if (background) panRef.current.colorize("fill", background);
+  }, [colors]);
+
+  return <div key={elementId.current} id={elementId.current}></div>;
+}
 export default Pan;
