@@ -14,31 +14,10 @@ const Oscilloscope = React.memo(function Oscilloscope(props) {
 
   const { size, colors, onReady, onChange } = { ...defaultProps, ...props };
 
-  function handleResize(size) {
-    if (osc.current === null || !Array.isArray(size)) return;
-
-    osc.current.resize(...size);
-  }
-
-  function handleColors(colors) {
-    if (osc.current === null || colors === undefined) return;
-
-    const { line, background } = colors;
-    if (line) osc.current.colorize("accent", line);
-    if (background) osc.current.colorize("fill", background);
-  }
-
   useEffect(() => {
-    function handleChange(state) {
-      onChange(state);
-    }
-
     osc.current = new Nexus.Oscilloscope(elementId.current);
 
-    osc.current.colors = handleColors;
-    osc.current.on("change", handleChange);
-    osc.current.on("colors", handleColors);
-    osc.current.on("resize", handleResize);
+    osc.current.on("change", onChange);
 
     onReady(osc.current);
 
@@ -47,11 +26,15 @@ const Oscilloscope = React.memo(function Oscilloscope(props) {
   }, []);
 
   useEffect(() => {
-    osc.current.emit("colors", colors);
+    if (osc.current === null || colors === undefined) return;
+    const { line, background } = colors;
+    if (line) osc.current.colorize("accent", line);
+    if (background) osc.current.colorize("fill", background);
   }, [colors]);
 
   useEffect(() => {
-    osc.current.emit("resize", size);
+    if (osc.current === null || !Array.isArray(size)) return;
+    osc.current.resize(...size);
   }, [size]);
 
   return <div key={elementId.current} id={elementId.current}></div>;
