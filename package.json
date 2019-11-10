@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "ann-music-note": "^1.0.9",
     "antd": "^3.23.6",
     "nexusui": "^2.0.10",
     "react": "^16.10.2",
